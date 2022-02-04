@@ -69,6 +69,8 @@ class FileUtil(private val context: Context) {
         delete()
     }
 
+
+
     companion object {
         private const val TEMPORARY_DIRECTORY_NAME = "Temporary"
         private const val RESULT_DIRECTORY_NAME = "Results"

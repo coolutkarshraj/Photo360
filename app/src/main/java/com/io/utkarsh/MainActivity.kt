@@ -1,12 +1,16 @@
 package com.io.utkarsh
 
 import android.Manifest
+import android.R.attr
 import android.app.Activity
 import android.app.ProgressDialog
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.StrictMode
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -30,6 +34,17 @@ import io.reactivex.subjects.PublishSubject
 import java.io.File
 import id.zelory.compressor.Compressor
 import kotlinx.coroutines.Dispatchers
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import android.graphics.BitmapFactory
+
+import android.graphics.Bitmap
+import android.os.Environment
+import id.zelory.compressor.saveBitmap
+import java.lang.Exception
+import java.util.*
+import android.R.attr.bitmap
+import java.io.FileNotFoundException
 
 
 class MainActivity : AppCompatActivity() {
@@ -121,10 +136,46 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showImage(file: File) {
+
         Picasso.with(this).load(file)
                 .memoryPolicy(MemoryPolicy.NO_STORE, MemoryPolicy.NO_CACHE)
                 .into(imageView)
+        var bitmap: Bitmap? = null
+        val options = BitmapFactory.Options()
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888
+        try {
+            bitmap = BitmapFactory.decodeStream(FileInputStream(file), null, options)
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+        }
+        if(bitmap != null){
+            SaveImage(bitmap!!)
+        }
+       }
+
+    private fun SaveImage(finalBitmap: Bitmap) {
+        val root = Environment.getExternalStorageDirectory().toString()
+        val myDir = File("$root/saved_images")
+        if (!myDir.exists()) {
+            myDir.mkdirs()
+        }
+        val generator = Random()
+        var n = 10000
+        n = generator.nextInt(n)
+        val fname = "Image-$n.jpg"
+        val file = File(myDir, fname)
+        if (file.exists()) file.delete()
+        try {
+            val out = FileOutputStream(file)
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+            out.flush()
+            out.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
+
+
 
     override fun onDestroy() {
         super.onDestroy()
